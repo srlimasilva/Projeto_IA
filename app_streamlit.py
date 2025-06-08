@@ -99,7 +99,7 @@ def plot_seasonality_results(sales_ts, monthly_sales_avg, trend, seasonal, resid
     st.subheader(f"Padrão Sazonal Médio Mensal {title_suffix}")
     if monthly_sales_avg is not None and not monthly_sales_avg.empty:
         fig2, ax2 = plt.subplots(figsize=(24, 5))
-        sns.barplot(x=monthly_sales_avg.index, y=monthly_sales_avg.values, palette='viridis', ax=ax2)
+        sns.barplot(x=monthly_sales_avg.index, y=monthly_sales_avg.values, palette='viridis', ax=ax2, hue=monthly_sales_avg.index, legend=False)
         ax2.set_title(f'Vendas Médias por Mês (Padrão Sazonal) {title_suffix}')
         ax2.set_xlabel('Mês')
         ax2.set_ylabel('Valor de Venda Médio')
@@ -221,7 +221,7 @@ with tab_sazonalidade_upload:
 
     if uploaded_file_sazonalidade is not None:
         try:
-            # Delimitador AGORA é vírgula (,) para o NOVO dataset
+            # Delimitador é vírgula (,) para o NOVO dataset
             uploaded_df_raw_saz = pd.read_csv(uploaded_file_sazonalidade, sep=',', header=0)
             st.write("Pré-visualização do Dataset Carregado:")
             st.dataframe(uploaded_df_raw_saz.head())
@@ -273,11 +273,11 @@ with tab_model_info: # Aba renomeada
         st.info(f"O melhor modelo selecionado é um **{best_model_type}**. Modelos de ensemble como o Random Forest ou XGBoost são compostos por muitas árvores e não possuem uma única árvore para visualização direta, mas geralmente oferecem maior robustez e eficácia.")
 
 
-with tab_previsao_vendas: # Aba renomeada
+with tab_previsao_vendas: 
     st.header("Faça uma Previsão de Venda com o Modelo de Vendas")
     st.markdown(f"Experimente diferentes valores para as características e veja qual o **Valor de Venda** previsto pelo modelo **{best_model_type}**.")
 
-    # Obter os valores únicos para as colunas categóricas do dataset original
+    
     try:
         # Carregar o DataFrame original para obter valores únicos
         df_original_full = pd.read_csv('dataset.csv', sep=',', header=0) # <-- MUDAR AQUI PARA VÍRGULA
@@ -293,8 +293,6 @@ with tab_previsao_vendas: # Aba renomeada
             if col in df_original_full.columns:
                 # Tratar nulos e garantir que sejam strings antes de unique() e sorted()
                 options[col] = [str(x) for x in df_original_full[col].dropna().unique()]
-                # IMPORTANTE: Filtrar opções com muitas categorias (alta cardinalidade)
-                # Para evitar dropdowns gigantes e problemas de performance/interface
                 if len(options[col]) > 100: # Limite arbitrário, ajuste se necessário
                     st.warning(f"Coluna '{col}' tem muitas categorias ({len(options[col])}). Exibindo apenas as 100 mais frequentes para evitar sobrecarga na interface. Considere agrupá-las.")
                     top_categories = df_original_full[col].value_counts().nlargest(100).index.tolist()
@@ -324,9 +322,8 @@ with tab_previsao_vendas: # Aba renomeada
             'SubCategoria': ["Art", "Chairs", "Phones"],
         }
 
-    # Controles de entrada para as features
-    # AS COLUNAS NUMÉRICAS 'Quantidade', 'Desconto', 'Custo_Envio' NÃO ESTÃO MAIS DISPONÍVEIS
-    col1, col2 = st.columns(2) # Reduzido para 2 colunas, pois há menos inputs
+
+    col1, col2 = st.columns(2) 
 
     with col1:
         segmento_input = st.selectbox("Segmento", sorted(options['Segmento']))
@@ -340,12 +337,9 @@ with tab_previsao_vendas: # Aba renomeada
 
     st.markdown("---") # Separador visual
 
-    # IMPORTANTE: Não há mais campos numéricos como Quantidade, Desconto, Custo_Envio
-    # Se o modelo depender apenas de categóricas, a previsão será menos granular.
-    # Se você quiser adicionar inputs numéricos, precisará de novas features numéricas no dataset.
 
     if st.button("Obter Previsão de Venda"):
-        # Criar um DataFrame para a entrada do usuário
+
         input_data = pd.DataFrame({
             'Segmento': [segmento_input],
             'Pais': [pais_input],
@@ -353,18 +347,13 @@ with tab_previsao_vendas: # Aba renomeada
             'Estado': [estado_input],
             'Categoria': [categoria_input],
             'SubCategoria': [subcategoria_input],
-            # As seguintes colunas NÃO estão no novo dataset e foram removidas do input_data:
-            # 'Quantidade', 'Desconto', 'Custo_Envio', 'Prioridade_Pedido'
+
         })
 
-        # Categoriais para One-Hot Encoding no Streamlit
-        # Alinhado com as features usadas no analise_e_modelagem.py
+      
         categorical_features_for_model = ['Segmento', 'Pais', 'Cidade', 'Estado', 'Categoria', 'SubCategoria']
 
         input_encoded = pd.get_dummies(input_data, columns=categorical_features_for_model)
-
-        # Reindexar para garantir que todas as colunas de model_feature_names estejam presentes
-        # e preencher com 0 onde não houver correspondência. Isso é CRÍTICO.
         input_processed = input_encoded.reindex(columns=model_feature_names, fill_value=0)
 
         try:
