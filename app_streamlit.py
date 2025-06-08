@@ -378,4 +378,4 @@ with tab_previsao_vendas: # Aba renomeada
 
 
 st.markdown("---")
-st.markdown("Desenvolvido por Parceiro de Programação com Streamlit.")
+st.markdown("Desenvolvido por Jário Lima com Streamlit.")

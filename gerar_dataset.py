@@ -44,9 +44,9 @@ categorias_subcats = {
 
 # Valor médio e desvio padrão por categoria
 valores_categoria = {
-    "Furniture":     {"media": 300, "desvio": 100},
+    "Furniture":     {"media": 1000, "desvio": 100},
     "Office Supplies": {"media": 100, "desvio": 50},
-    "Technology":    {"media": 500, "desvio": 200}
+    "Technology":    {"media": 3000, "desvio": 200}
 }
 
 # Função para gerar ID parecido com o formato do dataset original
@@ -95,4 +95,4 @@ def gerar_dataset(n):
 
 # Gerar e salvar dataset
 df_gerado = gerar_dataset(total_registros)
-df_gerado.to_csv("dataset_multinacional2.csv", index=False)
+df_gerado.to_csv("dataset.csv", index=False)
