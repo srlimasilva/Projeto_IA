@@ -228,7 +228,8 @@ if model_type == "DecisionTreeRegressor":
     plt.figure(figsize=(25, 12))
     # Usar a profundidade ideal encontrada para o melhor DecisionTreeRegressor para a visualização,
     # mas limitar para 3-5 para legibilidade se a ideal for muito grande
-    viz_depth = min(best_dt_regressor.max_depth, 5) # Limita a profundidade para visualização
+    max_depth_dt = best_dt_regressor.get_params().get('max_depth', None)
+    viz_depth = min(max_depth_dt if max_depth_dt is not None else 5, 5) # Limita a profundidade para visualização
     plot_tree(best_dt_regressor, filled=True, feature_names=X.columns.tolist(),
               fontsize=9, max_depth=viz_depth)
     plt.title(f'Árvore de Decisão (Profundidade Máxima para Visualização: {viz_depth})')

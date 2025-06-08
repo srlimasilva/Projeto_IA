@@ -62,13 +62,13 @@ def perform_seasonality_analysis(df: pd.DataFrame, columns_mapping: dict, data_c
         return None, None, None, None, None
 
     sales_ts = df_processed.set_index(data_col_name)[sales_col_name].resample('MS').sum()
-    monthly_sales_avg = sales_ts.groupby(sales_ts.index.month).mean()
+    monthly_sales_avg = sales_ts.groupby(sales_ts.index.month).mean() # type: ignore
     # No analise_e_modelagem.py, o monthly_sales_avg.index é definido com nomes de mês.
     
     trend, seasonal, residual = None, None, None
     try:
         if len(sales_ts) >= 2 * 12: # Pelo menos 2 ciclos anuais completos
-            decomposition = seasonal_decompose(sales_ts, model='multiplicative', period=12, extrapolate_trend='freq')
+            decomposition = seasonal_decompose(sales_ts, model='multiplicative', period=12, extrapolate_trend='freq') # type: ignore
             trend = decomposition.trend
             seasonal = decomposition.seasonal
             residual = decomposition.resid
